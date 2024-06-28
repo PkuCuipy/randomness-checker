@@ -72,7 +72,9 @@ def plot_results(results: dict[int, int], n: int, save_folder: str = None, filen
     x, y = zip(*results.items())
     x = list(map(lambda i: int_to_bits_str(i, n), x))
     plt.clf()
-    plt.figure(figsize=(len(x) // 5, 5))
+    figure_width = max(5, len(x) // 5)
+    figure_height = 5
+    plt.figure(figsize=(figure_width, figure_height))
     plt.bar(x, y)
     plt.xticks(rotation=-90)
 
@@ -117,12 +119,14 @@ if __name__ == "__main__":
             data = file.read()
 
         MAX_BYTES = 1_000_000
-        data = data[:MAX_BYTES]
+        if len(data) > MAX_BYTES:
+            print(f"This file is too large, truncating to {MAX_BYTES / 10**6 : .2f} MB...")
+            data = data[:MAX_BYTES]
 
         bits_arr = bytes_to_bits(data)
         bits_arr = torch.tensor(bits_arr, dtype=torch.bool)
 
-        for n in [4, 8]:
+        for n in [1, 2, 3, 4, 5, 6, 7, 8]:
             results = {i: 0 for i in range(2**n)}
             for i in trange(2**n):
                 query = torch.tensor(int_to_bits(i, n), dtype=torch.bool)
